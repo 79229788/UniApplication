@@ -1,0 +1,44 @@
+{
+  "pages": [
+    {
+      "path": "pages/group-main/pages/tabbar/index",
+      "style": {}
+    },
+    {
+      "path": "pages/group-main/pages/tab-home/index",
+      "style": {}
+    },
+    {
+      "path": "pages/group-main/pages/tab-category/index",
+      "style": {}
+    },
+    {
+      "path": "pages/group-main/pages/tab-message/index",
+      "style": {}
+    },
+    {
+      "path": "pages/group-main/pages/tab-cart/index",
+      "style": {}
+    },
+    {
+      "path": "pages/group-main/pages/tab-mine/index",
+      "style": {}
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "pages/group-auth/pages",
+      "pages": [
+        {
+          "path": "login/index",
+          "style": {}
+        }
+      ]
+    }
+  ],
+  "globalStyle": {
+    "navigationStyle": "custom",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f5f5"
+  }
+}

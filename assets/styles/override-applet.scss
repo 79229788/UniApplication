@@ -1,0 +1,12 @@
+@import "source";
+@import "./ui/ui-border";
+page{
+  button{
+    line-height: rpx(44);
+    &[type=primary]{background: $main-color;}
+    &[type=primary]:after{display: none;}
+    &.button-hover[type=primary]{background: $main-dark-color;}
+    &[disabled][type=primary]{background: $main-dark-color;}
+  }
+
+}

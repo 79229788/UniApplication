@@ -1,0 +1,145 @@
+//(多版本)flex布局
+//$direction : row横向 column纵向
+@mixin m-flexbox($direction: row) {
+  @if $direction == column {
+    @include flexbox(( display: box, box-orient: vertical ));
+    @include flexbox(( display: flexbox, flex-direction: $direction ));
+    @include flexbox(( display: flex, flex-direction: $direction ));
+  } @else if $direction == row {
+    @include flexbox(( display: box, box-orient: horizontal ));
+    @include flexbox(( display: flexbox, flex-direction: $direction ));
+    @include flexbox(( display: flex, flex-direction: $direction ));
+  } @else if $direction == block {
+    @include flexbox(( display: block, box-orient: initial ));
+    @include flexbox(( display: block, flex-direction: initial ));
+    @include flexbox(( display: block, flex-direction: initial ));
+  }
+}
+
+//(多版本)flex元素比例
+@mixin m-flex($number) {
+  @include flexbox(( box-flex: $number ));
+  @include flex($number);
+}
+
+//(多版本)内容提行
+@mixin m-flex-wrap($value: wrap) {
+  @if $value == wrap {
+    @include flexbox(( box-lines: multiple ));
+  } @else if $value == nowrap {
+    @include flexbox(( box-lines: single ));
+  }
+  @include flexbox(( flex-wrap: $value ));
+}
+
+//(多版本)内容横向对齐方式
+@mixin m-justify-content($value: flex-start) {
+  @if $value == flex-start {
+    @include flexbox(( box-pack: start ));
+    @include flexbox(( flex-pack: start ));
+  } @else if $value == flex-end {
+    @include flexbox(( box-pack: end ));
+    @include flexbox(( flex-pack: end ));
+  } @else if $value == space-between {
+    @include flexbox(( box-pack: justify ));
+    @include flexbox(( flex-pack: justify ));
+  } @else if $value == space-around {
+    @include flexbox(( flex-pack: distribute ));
+  } @else {
+    @include flexbox(( box-pack: $value ));
+    @include flexbox(( flex-pack: $value ));
+  }
+  @include flexbox(( justify-content: $value ));
+}
+
+//(多版本)内容纵向对齐方式
+@mixin m-align-items($value: stretch) {
+  @if $value == flex-start {
+    @include flexbox(( box-align: start ));
+    @include flexbox(( flex-align: start ));
+  } @else if $value == flex-end {
+    @include flexbox(( box-align: end ));
+    @include flexbox(( flex-align: end ));
+  } @else {
+    @include flexbox(( box-align: $value ));
+    @include flexbox(( flex-align: $value ));
+  }
+  @include flexbox(( align-items: $value ));
+}
+
+//(多版本)内容居中(横向居中)
+@mixin m-box-center-horizontal($direction: row) {
+  @include m-flexbox($direction);
+  @if $direction == row {
+    @include m-justify-content(center);
+  } @else {
+    @include m-align-items(center);
+  }
+}
+
+//(多版本)内容居中(垂直居中)
+@mixin m-box-center-vertical($direction: row) {
+  @include m-flexbox($direction);
+  @if $direction == row {
+    @include m-align-items(center);
+  } @else {
+    @include m-justify-content(center);
+  }
+}
+
+//(多版本)内容顶部居中
+@mixin m-box-center-top($direction: row) {
+  @include m-flexbox($direction);
+  @if $direction == row {
+    @include m-justify-content(center);
+    @include m-align-items(flex-start);
+  } @else {
+    @include m-align-items(center);
+    @include m-justify-content(flex-start);
+  }
+}
+
+//(多版本)内容底部居中
+@mixin m-box-center-bottom($direction: row) {
+  @include m-flexbox($direction);
+  @if $direction == row {
+    @include m-justify-content(center);
+    @include m-align-items(flex-end);
+  } @else {
+    @include m-align-items(center);
+    @include m-justify-content(flex-end);
+  }
+}
+
+//(多版本)内容底部居中
+@mixin m-box-center-left($direction: row) {
+  @include m-flexbox($direction);
+  @if $direction == row {
+    @include m-align-items(center);
+    @include m-justify-content(flex-start);
+  } @else {
+    @include m-justify-content(center);
+    @include m-align-items(flex-start);
+  }
+}
+
+//(多版本)内容底部居中
+@mixin m-box-center-right($direction: row) {
+  @include m-flexbox($direction);
+  @if $direction == row {
+    @include m-align-items(center);
+    @include m-justify-content(flex-end);
+  } @else {
+    @include m-justify-content(center);
+    @include m-align-items(flex-end);
+  }
+}
+
+
+//(多版本)内容完全居中(横向/垂直均居中)
+@mixin m-box-center($direction: row) {
+  @include m-flexbox($direction);
+  @include m-justify-content(center);
+  @include m-align-items(center);
+}
+

@@ -1,0 +1,18 @@
+{
+  "name": "adyutuobangshopapplet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "async-validator": "^3.5.0",
+    "compass-mixins": "^0.12.10",
+    "dayjs": "^1.10.5",
+    "lodash": "^4.17.20"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

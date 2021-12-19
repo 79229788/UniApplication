@@ -1,0 +1,32 @@
+{
+  "name": "sails-generate-frontmodel",
+  "version": "0.10.0",
+  "description": "sails generate frontmodel",
+  "main": "Generator.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "frontmodel",
+    "generator",
+    "sails",
+    "generate",
+    "plugin"
+  ],
+  "author": "balderdashy",
+  "license": "MIT",
+  "dependencies": {
+  	"lodash": ">=2.4.x",
+  	"merge-defaults": ">=0.1.0"
+  },
+  "devDependencies": {
+    "sails-generate": "*",
+    "reportback": "*",
+    "fs-extra": "*"
+  },
+  "sailsGenerator": {
+    "type": "frontmodel",
+    "behavior": "overrides `sails generate frontmodel`",
+    "sailsVersion": "~0.10.0"
+  }
+}
