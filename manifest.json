@@ -1,5 +1,5 @@
 {
-    "name" : "ADYutuobangShopApplet",
+    "name" : "UniappApplication",
     "appid" : "",
     "description" : "",
     "versionName" : "1.0.0",
@@ -57,7 +57,7 @@
     "quickapp" : {},
     /* 小程序特有相关 */
     "mp-weixin" : {
-        "appid" : "wx3bc54db54e517d5d",
+        "appid" : "",
         "setting" : {
             "urlCheck" : false
         },
