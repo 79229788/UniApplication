@@ -6,40 +6,8 @@ import _isNaN from 'lodash/isNaN';
 import _has from 'lodash/has';
 import _random from 'lodash/random';
 import opacityMap from '@/configs/opacity';
-import md5 from './md5';
 
 module.exports = {
-  /**
-   * 拓展安全口令
-   * @param obj
-   * @return {string}
-   */
-  extendSafeString: function (obj) {
-    const key = [
-      String.fromCharCode(100 - 16),
-      String.fromCharCode(100 + 11),
-      String.fromCharCode(100 + 7),
-      String.fromCharCode(100 + 1),
-      String.fromCharCode(100 + 10),
-    ];
-    const idKey = [
-      String.fromCharCode(100 - 25),
-      String.fromCharCode(100 - 17),
-      String.fromCharCode(100 + 1),
-      String.fromCharCode(100 + 15),
-      String.fromCharCode(100 + 15),
-      String.fromCharCode(100 + 5),
-      String.fromCharCode(100 + 11),
-      String.fromCharCode(100 + 10),
-      String.fromCharCode(100 - 27),
-      String.fromCharCode(100),
-    ];
-    const name = 'y_u_t_u_o_b_a_n_g';
-    const random = this.getRandomString(10, 'abcdef0123456789');
-    const safe = uni.app.macros[idKey.join('').toUpperCase()] + '@' + random + '@' + name;
-    obj[key.join('')] = this.btoa(md5(safe) + random);
-    return obj;
-  },
   /**
    * 获取格式化的日期
    * @param format
