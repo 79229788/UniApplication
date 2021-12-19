@@ -31,7 +31,6 @@ _extend(Model.prototype, {
   uidPrefix: 'u',
   uidAttribute: '_uid',
   idAttribute: 'id',
-  fileAttribute: 'file',
   storageName: '',
   defaults: {},
   validators: {},
@@ -211,7 +210,7 @@ _extend(Model.prototype, {
    * 验证是否有效
    * @return {Promise<*>}
    */
-  isValid: function (validateFirst = false) {
+  isValid: function (validateFirst = true) {
     return new Promise((ok, no) => {
       let _validators = this.validators;
       if(this.validationGroups === '*') {
@@ -276,6 +275,8 @@ _extend(Model.prototype, {
     const opts = _extend({
       url: null,
       originData: false,
+      publicHeaders: true,
+      customHeaders: null,
     }, options || {});
     if(!opts.url) throw new Error('fetch url is not allowed to be empty');
     Comber.getConfig().beforeGetHandler.call(this, opts, 'model');
@@ -293,7 +294,8 @@ _extend(Model.prototype, {
       timeout: 1000 * Comber.getConfig().getTimeout,
     };
     const headers = {};
-    Comber.getConfig().headersHandler.call(this, headers);
+    if(opts.publicHeaders) Comber.getConfig().headersHandler.call(this, headers);
+    _extend(headers, opts.customHeaders);
     if(JSON.stringify(headers) !== '{}') requestOption.headers = headers;
     return new Promise((ok, no) => {
       Comber.request(requestOption).then(res => {
@@ -307,7 +309,9 @@ _extend(Model.prototype, {
         }
         ok(data);
       }).catch(error => {
-        no(utils.handleError(error));
+        error = utils.handleError(error);
+        no(error);
+        Comber.getConfig().onXHRError(error);
       });
     });
   },
@@ -319,31 +323,28 @@ _extend(Model.prototype, {
   save: function (options) {
     const opts = _extend({
       url: null,
-      useFormData: false,
       formFlatten: false,
       originData: false,
+      publicHeaders: true,
+      customHeaders: true,
     }, options || {});
     return new Promise((ok, no) => {
       if(!opts.url) return no(new Error('save url is not allowed to be empty'));
       this.isValid(true).then(() => {
         Comber.getConfig().beforePostHandler.call(this, opts, 'model');
         const attrs = this._handleSavedObject(opts);
-        const isFormData = attrs._hasFile || opts.useFormData;
-        const formData = new FormData();
-        if(isFormData) _each(attrs, (attr, key) => formData.append(key, attr));
         const domain = Comber.getConfig().apiUrl || '';
         const requestOption = {
           url: opts.url.indexOf('http') === 0 ? opts.url : (domain + opts.url),
           method: 'post',
-          data: (isFormData ? formData : attrs),
+          data: attrs,
           timeout: 1000 * Comber.getConfig().postTimeout,
         };
         const headers = {
-          'content-type': isFormData
-            ? 'application/x-www-form-urlencoded'
-            : 'application/json;charset=utf-8'
+          'content-type': 'application/json;charset=utf-8'
         };
-        Comber.getConfig().headersHandler.call(this, headers);
+        if(opts.publicHeaders) Comber.getConfig().headersHandler.call(this, headers);
+        _extend(headers, opts.customHeaders);
         if(JSON.stringify(headers) !== '{}') requestOption.headers = headers;
         Comber.request(requestOption).then(res => {
           if(opts.originData) return ok(res.data);
@@ -351,14 +352,18 @@ _extend(Model.prototype, {
             .dataHandler.call(this, res.data, 'model') || res.data;
           if(_isObject(data)) {
             this.set(data);
-            return ok(this, res.data);
+            return ok(this);
           }
-          return ok(data, res.data);
+          return ok(data);
         }).catch(error => {
-          no(utils.handleError(error.response || error));
+          error = utils.handleError(error);
+          no(error);
+          Comber.getConfig().onXHRError(error);
         });
       }).catch(error => {
-        no(utils.handleError(error));
+        error = utils.handleError(error);
+        no(error);
+        Comber.getConfig().onXHRError(error);
       });
     });
   },
@@ -371,6 +376,8 @@ _extend(Model.prototype, {
     const opts = _extend({
       url: null,
       originData: false,
+      publicHeaders: true,
+      customHeaders: null,
     }, options || {});
     if(!opts.url) throw new Error('delete url is not allowed to be empty');
     Comber.getConfig().beforePostHandler.call(this, opts, 'model');
@@ -384,16 +391,19 @@ _extend(Model.prototype, {
     const headers = {
       'content-type': 'application/json;charset=utf-8'
     };
-    Comber.getConfig().headersHandler.call(this, headers);
+    if(opts.publicHeaders) Comber.getConfig().headersHandler.call(this, headers);
+    _extend(headers, opts.customHeaders);
     if(JSON.stringify(headers) !== '{}') requestOption.headers = headers;
     return new Promise((ok, no) => {
       Comber.request(requestOption).then(res => {
         if(opts.originData) return ok(res.data);
         const data = Comber.getConfig()
           .dataHandler.call(this, res.data, 'model') || res.data;
-        return ok(this, data);
+        return ok(data);
       }).catch(error => {
-        no(utils.handleError(error.response || error));
+        error = utils.handleError(error);
+        no(error);
+        Comber.getConfig().onXHRError(error);
       });
     });
   },
@@ -404,33 +414,8 @@ _extend(Model.prototype, {
    * @private
    */
   _handleSavedObject: function (options) {
-    // 检查formData属性是否设置，并且检查是否存在file属性
-    let attrs = _extend(this.toOrigin(), { _hasFile: false, _fileCount: 0 });
-    const existFile = utils.isFileType(this.attributes[this.fileAttribute]);
-    if(options.useFormData === true || existFile) {
-      if(existFile) {
-        attrs._hasFile = true;
-        attrs._fileCount = 1;
-      }
-      const fileAttr = attrs[this.fileAttribute];
-      delete attrs[this.fileAttribute];
-      if(options.formFlatten === true) attrs = utils.flattenObject(attrs);
-      attrs[this.fileAttribute] = fileAttr;
-      _each(attrs, (attr, key) => {
-        if (key === this.fileAttribute
-          && (attr instanceof FileList || attr instanceof Array && attr.length > 0)
-          && (attr[0] instanceof File || attr[0] instanceof Blob)) {
-          attrs['_fileCount'] = attr.length;
-          _each(attr, (file, index) => {
-            attrs[key + index] = file;
-          });
-        }else {
-          attrs[key] = attr;
-        }
-      });
-    }else {
-      _extend(attrs, this.toOrigin());
-    }
+    const attrs = this.toOrigin();
+
     return attrs;
   },
 

@@ -4,7 +4,6 @@ import utils from '../utils/common';
 import _extend from 'lodash/extend';
 import _find from 'lodash/find';
 import _findIndex from 'lodash/findIndex';
-import _cloneDeep from 'lodash/cloneDeep';
 import _remove from 'lodash/remove';
 import _isString from 'lodash/isString';
 import _isObject from 'lodash/isObject';
@@ -279,6 +278,8 @@ _extend(Collection.prototype, {
       pageSize: null,
       isUpdate: true,
       originData: false,
+      publicHeaders: true,
+      customHeaders: null,
     }, options || {});
     if(!opts.url) throw new Error('fetch url is not allowed to be empty');
     Comber.getConfig().beforeGetHandler.call(this, opts, 'collection');
@@ -303,7 +304,8 @@ _extend(Collection.prototype, {
       requestOption.headers.sess = this.sessionToken;
     }
     const headers = {};
-    Comber.getConfig().headersHandler.call(this, headers);
+    if(opts.publicHeaders) Comber.getConfig().headersHandler.call(this, headers);
+    _extend(headers, opts.customHeaders);
     if(JSON.stringify(headers) !== '{}') requestOption.headers = headers;
     return new Promise((ok ,no) => {
       Comber.request(requestOption).then(res => {
@@ -313,122 +315,9 @@ _extend(Collection.prototype, {
         if(opts.originData) return ok(res.data);
         ok(data);
       }).catch(error => {
-        no(utils.handleError(error.response || error));
-      });
-    });
-  },
-  /**
-   * 保存数据集合到服务器
-   * @param options
-   */
-  save: function (options) {
-    const opts = _extend({
-      url: null,
-      isUpdate: true,
-      useFormData: false,
-      formFlatten: false,
-      originData: false,
-    }, options || {});
-    return new Promise((ok, no) => {
-      if(!opts.url) return no(new Error('save url is not allowed to be empty'));
-      this.isValid(true).then(() => {
-        Comber.getConfig().beforePostHandler.call(this, opts, 'collection');
-        const domain = Comber.getConfig().apiUrl || '';
-        const data = _cloneDeep(this.attributes);
-        data.models = [];
-        let hasFile = false;
-        for(let i = 0; i< this.models.length; i++) {
-          const model = this.models[i];
-          const attr = model._handleSavedObject(_extend({}, opts, { formFlatten: false }));
-          data.models.push(attr);
-          if(!hasFile) hasFile = attr._hasFile;
-        }
-        const isFormData = hasFile || opts.useFormData;
-        const formData = new FormData();
-        if(isFormData) {
-          if(opts.formFlatten) data.models = utils.flattenObject(data.models);
-          _each(data.models, (attr, key) => formData.append(key, attr));
-        }
-        const requestOption = {
-          url: opts.url.indexOf('http') === 0 ? opts.url : (domain + opts.url),
-          method: 'post',
-          data: (isFormData ? formData : data),
-          timeout: 1000 * Comber.getConfig().postTimeout,
-        };
-        const headers = {
-          'content-type': isFormData
-            ? 'application/x-www-form-urlencoded'
-            : 'application/json;charset=utf-8'
-        };
-        Comber.getConfig().headersHandler.call(this, headers);
-        if(JSON.stringify(headers) !== '{}') requestOption.headers = headers;
-        Comber.request(requestOption).then(res => {
-          const data = Comber.getConfig()
-            .dataHandler.call(this, res.data, 'collection') || res.data;
-          if(opts.isUpdate) this.add(data);
-          if(opts.originData) return ok(res.data);
-          ok(new this.constructor(data), res.data);
-        }).catch(error => {
-          no(utils.handleError(error.response || error));
-        });
-      }).catch(error => {
-        no(utils.handleError(error));
-      });
-    });
-  },
-  /**
-   * 保存数据从服务器
-   * @param objects  待删除的模型数组\集合（不填则表示删除当前集合全部模型）
-   * @param options
-   */
-  delete: function (objects, options) {
-    let isPart = true;
-    let delCollection;
-    if(options) {
-      if(objects) delCollection = new this.constructor(objects);
-    }else if(_isObject(objects)) {
-      isPart = false;
-      delCollection = this;
-      options = objects;
-    }else {
-      return;
-    }
-    const opts = _extend({
-      url: null,
-      isUpdate: true,
-      success: function(data){},
-      error: function(error){}
-    }, options || {});
-    if(!opts.url) throw new Error('delete url is not allowed to be empty');
-    Comber.getConfig().beforePostHandler.call(this, opts, 'collection');
-    const domain = Comber.getConfig().apiUrl || '';
-    const data = _cloneDeep(this.attributes);
-    data.models = delCollection.toOrigin();
-    const requestOption = {
-      url: opts.url.indexOf('http') === 0 ? opts.url : (domain + opts.url),
-      method: 'delete',
-      data: data,
-      timeout: 1000 * Comber.getConfig().postTimeout,
-    };
-    const headers = {
-      'content-type': 'application/json;charset=utf-8'
-    };
-    Comber.getConfig().headersHandler.call(this, headers);
-    if(JSON.stringify(headers) !== '{}') requestOption.headers = headers;
-    return new Promise((ok, no) => {
-      Comber.request(requestOption).then(res => {
-        if(opts.isUpdate) {
-          if(isPart) {
-            this.remove(delCollection);
-          }else {
-            this.clear();
-          }
-        }
-        const data = Comber.getConfig()
-          .dataHandler.call(this, res.data, 'collection') || res.data;
-        ok(this, data);
-      }).catch(error => {
-        no(utils.handleError(error.response || error));
+        error = utils.handleError(error);
+        no(error);
+        Comber.getConfig().onXHRError(error);
       });
     });
   },

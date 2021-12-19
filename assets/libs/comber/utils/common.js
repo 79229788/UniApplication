@@ -35,7 +35,6 @@ export default {
       ? errorInfo.code : -1;
     error.message = errorInfo.message || '未知错误';
     if(errorInfo.stack) error.stack = errorInfo.stack;
-    Comber.getConfig().onXHRError(error);
     return error;
   },
   /**
@@ -63,10 +62,7 @@ export default {
     const output = {};
     for(let i in obj) {
       if(!obj.hasOwnProperty(i)) continue;
-      //文件类型不做处理
-      if(utils.isFileType(obj[i])) {
-        output[i] = obj[i];
-      }else if(typeof obj[i] === 'object') {
+      if(typeof obj[i] === 'object') {
         const flatObject = flatten(obj[i]);
         for(let x in flatObject) {
           if (!flatObject.hasOwnProperty(x)) continue;
@@ -96,18 +92,6 @@ export default {
       if(typeName === 'Array' && !_isArray(value)) { isType = false;break; }
     }
     return isType;
-  },
-  /**
-   * 是否是文件类型
-   * @param attr
-   * @return {boolean}
-   */
-  isFileType: function(attr) {
-    return attr instanceof File
-      || attr instanceof FileList
-      || (attr instanceof Array
-        && (attr[0] instanceof File || attr[0] instanceof Blob))
-      || attr instanceof Blob;
   },
   /**
    * 判断是否为无效值[ '', null, undefined, NaN, [], {} ]

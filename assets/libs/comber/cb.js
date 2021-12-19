@@ -44,7 +44,9 @@ Comber.request = function (options) {
         if(res.statusCode === 200) {
           ok(res);
         }else if(res.statusCode === 404) {
-          no(new Error('url resource not found!'));
+          const error = new Error('url resource not found!');
+          error.code = 'statusCode404';
+          no(error);
         }else {
           no(res);
         }
