@@ -4,6 +4,7 @@
     .list-view{
       .item{
         background: #fff;
+        &.no-data{padding: rem(15);}
       }
     }
   }
@@ -15,7 +16,9 @@
       <view class="list-view">
         <!-- 首次加载中 -->
         <template v-if="list.data === null">
-          <view class="ui-data-loading">正在火速加载</view>
+          <view class="item no-data">
+            <u-skeleton avatar rows="3"/>
+          </view>
         </template>
         <!-- 数据不存在 -->
         <template v-else-if="list.data.length === 0">
@@ -100,6 +103,7 @@
             this.list.data = this.list.data.concat(list);
           }else {
             this.list.data = list;
+            uni.pageScrollTo({ scrollTop: 0, duration: 0 });
           }
           this.moreLoading = false;
           this.refreshLoading = false;
