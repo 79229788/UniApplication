@@ -19,6 +19,7 @@
   export default {
     data: function () {
       return {
+        sharedEvent,
         sharedState: sharedStore.state,
 
       }

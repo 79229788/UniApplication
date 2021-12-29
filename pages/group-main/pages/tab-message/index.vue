@@ -39,6 +39,7 @@
     data: function () {
       return {
         name: 'tab-message',
+        sharedEvent,
         sharedState: sharedStore.state,
 
       }
@@ -58,11 +59,11 @@
     },
     onReachBottom: function () {
       uni.app.log(`[${this.name}]滑到底部`);
-      sharedEvent.$emit('reachBottom');
+      sharedEvent.$emit('pageEvents', 'onReachBottom');
     },
     onPullDownRefresh: function () {
       uni.app.log(`[${this.name}]开始下拉刷新`);
-      sharedEvent.$emit('pullDownRefresh');
+      sharedEvent.$emit('pageEvents', 'onPullDownRefresh');
     },
     methods: {
       //*********************************内置方法
@@ -70,6 +71,11 @@
       //**********初始数据
       initData: function () {
 
+      },
+      //**********重置数据
+      resetData: function (scene, data) {
+        sharedEvent.$emit('resetData', ...arguments);
+        if(!scene) this.initData();
       },
 
       //*********************************内置事件

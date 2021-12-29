@@ -67,6 +67,7 @@
     },
     data: function () {
       return {
+        sharedEvent,
         sharedState: sharedStore.state,
         currentTab: null,
         currentTitle: null,
@@ -95,6 +96,12 @@
       //**********初始数据
       initData: function () {
 
+      },
+      //**********重置数据
+      resetData: function () {
+        for(let $vm of this.getTabVmList()) {
+          if($vm.resetData) $vm.resetData(...arguments);
+        }
       },
       //**********获取标签组件列表
       getTabVmList: function () {
