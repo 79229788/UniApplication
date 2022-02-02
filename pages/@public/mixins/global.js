@@ -3,6 +3,7 @@ import _each from 'lodash/each';
 import _isObject from 'lodash/isObject';
 import _isString from 'lodash/isString';
 import _isArray from 'lodash/isArray';
+import _cloneDeep from 'lodash/cloneDeep';
 import _extend from 'lodash/extend';
 import _throttle from 'lodash/throttle';
 import baseUtils from '@/assets/utils/base';
@@ -561,6 +562,17 @@ const methods = {
     });
   },
   /**
+   * 深度解码url
+   * @param url
+   * @returns {*}
+   */
+  decodeUrl: function (url) {
+    if(decodeURIComponent(url) === url) {
+      return url;
+    }
+    return this.$decodeUrl(decodeURIComponent(url));
+  },
+  /**
    * [初始化阶段]获取Ref组件实例
    * tips：为了兼容字节跳动在created和mounted生命周期内无法获取refs的BUG
    * @param vm
@@ -705,13 +717,23 @@ const methods = {
    */
   getExtParams: function () {
     return new Promise((ok) => {
-      const ext = extData.ext;
+      const ext = _cloneDeep(extData.ext);
       if(uni.app.macros.DEBUG) {
         ext.companyId = uni.app.macros.DEVCOMPANYID;
       }
       ext.wxAppId = uni.app.macros.WXAPPID;
       return ok(ext);
     });
+  },
+  /**
+   * 取出路由取参数
+   * @param vm
+   * @param cb
+   */
+  fetchRouteQuery: function (vm, cb) {
+    if(!vm) throw new Error('vm参数不能为空');
+    if(!(vm instanceof Vue)) throw new Error('vm参数必须为vue实例');
+    vm.$nextTick(() => this.sharedState.$innerFetchRouteQuery(cb));
   },
 };
 

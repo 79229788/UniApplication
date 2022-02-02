@@ -68,7 +68,7 @@
         });
         this.tabList = tabList;
         this.$nextTick(() => {
-          this.sharedState.$fetchRouteQuery(query => {
+          this.$fetchRouteQuery(this, query => {
             const currentTab = query.tab;
             const currentTabIndex = _findIndex(this.tabList,
               item => item.value === currentTab);

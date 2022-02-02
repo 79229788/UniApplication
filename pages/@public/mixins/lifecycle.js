@@ -28,30 +28,26 @@ const mixin = {
   },
   onLoad: function (query) {
     this.__rootPage = true;
-    this.$routeQuery = query;
-    this.$fetchRouteQuery = function handler(cb) {
-      uni.app.loading();
-      uni.app.fetchLaunchQueryData(query).then(query => {
-        uni.app.hideLoading();
-        cb(query);
-      }).catch(error => {
-        uni.app.hideLoading();
-        uni.app.logError('$fetchLaunchQueryData', error);
-        uni.app.alertLoadError(error, () => handler(...arguments))
-      });
-    };
-    if(this.sharedState) {
-      this.sharedState.$routeQuery = this.$routeQuery;
-      this.sharedState.$fetchRouteQuery = this.$fetchRouteQuery;
-    }
-    uni.app.$decodeUrl = function (url) {
-      if(decodeURIComponent(url) === url) {
-        return url;
-      }
-      return uni.app.$decodeUrl(decodeURIComponent(url));
-    }
+    this.$fetchRouteQueryHandler(query);
   },
   methods: {
+    //**********路由取参数处理
+    $fetchRouteQueryHandler: function (query) {
+      this.$innerFetchRouteQuery = function handler(cb) {
+        uni.app.loading();
+        uni.app.fetchLaunchQueryData(query).then(query => {
+          uni.app.hideLoading();
+          cb(query);
+        }).catch(error => {
+          uni.app.hideLoading();
+          uni.app.logError('$innerFetchRouteQuery', error);
+          uni.app.alertLoadError(error, () => handler(...arguments))
+        });
+      };
+      if(this.sharedState) {
+        this.sharedState.$innerFetchRouteQuery = this.$innerFetchRouteQuery;
+      }
+    },
     //**********获取页面布局实例
     $getPageLayout: function () {
       const $firstChild = (this.$children || [])[0];
