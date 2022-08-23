@@ -49,8 +49,8 @@
           uni.app.platform = uni.app.system.system
             .toLowerCase().indexOf('ios') >= 0 ? 'ios' : 'android';
         }
-        uni.app.safeOffsetTop = (uni.app.system.safeAreaInsets || {}).top || uni.app.system.statusBarHeight || 0;
-        uni.app.safeOffsetBottom = (uni.app.system.safeAreaInsets || {}).bottom || 0;
+        uni.app.safeOffsetTop = (uni.app.system.safeArea || {}).top || uni.app.system.statusBarHeight || 0;
+        uni.app.safeOffsetBottom = uni.app.system.screenHeight - ((uni.app.system.safeArea || {}).bottom || 0);
         uni.app.headerHeight = uni.app.platform === 'android' ? 48 : 44;
         uni.app.tabberHeight = 50;
         for(let key in pageMapData) {
